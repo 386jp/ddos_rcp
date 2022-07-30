@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  api:
+    build: api/.
+    expose:
+      - 8000
+    restart: always
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PW: ${DB_PW}
+      DEV_MODE: ${DEV_MODE}
+      TZ: ${TZ}
+    depends_on:
+      - db
+
+  frontend:
+    build: frontend/.
+    expose:
+      - 3000
+    restart: always
+    environment:
+      REACT_APP_API_HOST_NAME: ${REACT_APP_API_HOST_NAME}
+      REACT_APP_WS_API_HOST_NAME: ${REACT_APP_WS_API_HOST_NAME}
+    depends_on:
+      - api
+
+  lb:
+    image: nginx:latest
+    ports:
+    - 8000:80
+    restart: always
+    volumes:
+    - ./lb/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+    - api
+    - frontend
+
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    expose:
+      - 5432
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PW}
+      TZ: ${TZ}
+
+volumes:
+  postgres:

@@ -1,0 +1,1 @@
+from app.controllers.crud import game, result

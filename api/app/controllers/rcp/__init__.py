@@ -1,0 +1,1 @@
+from app.controllers.rcp import game_controller
